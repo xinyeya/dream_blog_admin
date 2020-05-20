@@ -13,7 +13,12 @@ Vue.use(VueRouter)
         path: '/',
         name: 'home',
         component: () => import('@/views/home')
-      }
+      },
+      {
+        path: '/article',
+        name: 'article',
+        component: () => import('@/views/article')
+      },
     ]
   }
 ]
