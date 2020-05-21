@@ -39,7 +39,7 @@
                 <el-table-column
                         prop="desc"
                         label="简介"
-                        width="200"
+                        width="261"
                         show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column

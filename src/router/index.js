@@ -19,6 +19,11 @@ Vue.use(VueRouter)
         name: 'article',
         component: () => import('@/views/article')
       },
+      {
+        path: '/label',
+        name: 'label',
+        component: () => import('@/views/label')
+      }
     ]
   }
 ]
