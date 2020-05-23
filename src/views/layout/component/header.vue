@@ -14,7 +14,9 @@
                         </div>
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item>个人信息</el-dropdown-item>
+                        <el-dropdown-item>
+                            <span @click="userinfo">个人信息</span>
+                        </el-dropdown-item>
                         <el-dropdown-item>退出登录</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
@@ -34,6 +36,9 @@
         methods: {
             errorHandler() {
                 return true
+            },
+            userinfo () {
+                this.$router.push({path:'/user_info'})
             }
         }
     }

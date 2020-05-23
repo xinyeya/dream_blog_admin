@@ -46,6 +46,6 @@
     .el-main {
         background-color: #E9EEF3;
         color: #333;
-        height: 100vh;
+        height: 90vh;
     }
 </style>

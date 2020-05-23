@@ -28,6 +28,11 @@ Vue.use(VueRouter)
         path: '/label',
         name: 'label',
         component: () => import('@/views/label')
+      },
+      {
+        path: 'user_info',
+        name: 'userInfo',
+        component: () => import('@/views/userinfo')
       }
     ]
   }
