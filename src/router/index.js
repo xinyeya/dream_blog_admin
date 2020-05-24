@@ -33,6 +33,11 @@ Vue.use(VueRouter)
         path: 'user_info',
         name: 'userInfo',
         component: () => import('@/views/userinfo')
+      },
+      {
+        path: '/music',
+        name: 'music',
+        component: () => import('@/views/music')
       }
     ]
   }
