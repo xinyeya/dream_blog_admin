@@ -10,4 +10,7 @@ body{
   margin: 0;
   height: 100%;
 }
+*{
+  font-family:"宋体",Georgia,Serif;
+}
 </style>
