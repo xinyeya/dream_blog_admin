@@ -23,12 +23,6 @@
                 <el-form-item label="确认密码" prop="checkPass">
                     <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="性别" prop="sex">
-                    <el-select v-model="ruleForm.sex" placeholder="请选择性别">
-                        <el-option label="男" value="1"></el-option>
-                        <el-option label="女" value="0"></el-option>
-                    </el-select>
-                </el-form-item>
                 <el-form-item label="QQ">
                     <el-input v-model="ruleForm.qq"></el-input>
                 </el-form-item>
@@ -43,31 +37,22 @@
         </el-card>
         <div v-if="!showEdit" class="userinfo">
             <el-row>
-                账号：111
+                账号：{{ruleForm.username}}
             </el-row>
             <el-row>
-                性别：男
+                QQ：{{ruleForm.qq}}
             </el-row>
             <el-row>
-                年龄：20
+                文章数量：{{ruleForm.a_num}}
             </el-row>
             <el-row>
-                状态：正常
+                获赞：{{ruleForm.p_num}}
             </el-row>
             <el-row>
-                QQ：1329132389
+                阅读量：{{ruleForm.h_num}}
             </el-row>
             <el-row>
-                注册时间：2020-5-23 09:51
-            </el-row>
-            <el-row>
-                文章数量：40
-            </el-row>
-            <el-row>
-                获赞：100
-            </el-row>
-            <el-row>
-                个性签名：这个人很懒，什么都没有写哦
+                个性签名：{{ruleForm.desc}}
             </el-row>
             <el-row type="flex" justify="center" align="center">
                 <el-col :span="3">
@@ -79,6 +64,8 @@
 </template>
 
 <script>
+    import {userdetail} from "../../api/users";
+
     export default {
         name: "userInfo",
         data () {
@@ -108,7 +95,6 @@
                     username: '',
                     password: '',
                     checkPass: '',
-                    sex: '男',
                     qq: '',
                     desc: ''
                 },
@@ -130,7 +116,19 @@
                 }
             }
         },
+
+        created(){
+            this.getUserInfo()
+        },
+
         methods: {
+
+            // 获取用户信息
+            async getUserInfo () {
+                let data = await userdetail()
+                this.ruleForm = data[0]
+                console.log(this.ruleForm)
+            },
 
             // 显示修改的页面
             handleShowEdit () {
