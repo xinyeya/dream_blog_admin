@@ -6,11 +6,11 @@
                 <el-form-item label="头像">
                     <el-upload
                             class="avatar-uploader"
-                            action="https://jsonplaceholder.typicode.com/posts/"
+                            action="http://127.0.0.1:3000/admin/users/update"
                             :show-file-list="false"
                             :on-success="handleAvatarSuccess"
                             :before-upload="beforeAvatarUpload">
-                        <img v-if="ruleForm.imageUrl" :src="ruleForm.imageUrl" class="avatar">
+                        <img v-if="imgurl" :src="imgurl" class="avatar">
                         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                     </el-upload>
                 </el-form-item>
@@ -64,7 +64,7 @@
 </template>
 
 <script>
-    import {userdetail} from "../../api/users";
+    import {userdetail, useredit} from "../../api/users";
 
     export default {
         name: "userInfo",
@@ -90,8 +90,9 @@
             };
             return {
                 showEdit: false,
+                imgurl: '',
                 ruleForm: {
-                    imageUrl: '',
+                    avatar: '',
                     username: '',
                     password: '',
                     checkPass: '',
@@ -103,11 +104,11 @@
                         { required: true, message: '请输入昵称', trigger: 'blur' }
                     ],
                     password: [
-                        { required: true, message: '请输入密码', trigger: 'blur' },
+                        // { required: true, message: '请输入密码', trigger: 'blur' },
                         { validator: validatePass, trigger: 'blur' }
                     ],
                     checkPass: [
-                        { required: true, message: '请输入密码', trigger: 'blur' },
+                        // { required: true, message: '请输入密码', trigger: 'blur' },
                         { validator: validatePass2, trigger: 'blur' }
                     ],
                     sex: [
@@ -125,9 +126,24 @@
 
             // 获取用户信息
             async getUserInfo () {
-                let data = await userdetail()
-                this.ruleForm = data[0]
-                console.log(this.ruleForm)
+                try{
+                    let data = await userdetail()
+                    this.ruleForm = data[0]
+                    this.imgurl = data[0].avatar
+                    console.log(this.ruleForm)
+                }catch (e) {
+                    console.log(e)
+                }
+            },
+
+            // 修改用户信息
+            async userEdit () {
+                try {
+                    let data = await useredit(this.ruleForm)
+                    console.log(data)
+                }catch (e) {
+                    console.log(e)
+                }
             },
 
             // 显示修改的页面
@@ -139,8 +155,8 @@
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        alert('submit!');
-                        this.showEdit = false
+                        this.userEdit()
+                        // this.showEdit = false
                     } else {
                         console.log('error submit!!');
                         return false;
@@ -149,14 +165,14 @@
             },
 
             // 重置
-            resetForm(formName) {
-                this.$refs[formName].resetFields();
+            resetForm() {
                 this.showEdit = false
             },
 
             // 上传后的预览
             handleAvatarSuccess(res, file) {
-                this.ruleForm.imageUrl = URL.createObjectURL(file.raw);
+                console.log(URL.createObjectURL(file.raw))
+                this.imgurl = URL.createObjectURL(file.raw);
             },
 
             // 上传前的检测

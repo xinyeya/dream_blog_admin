@@ -101,7 +101,7 @@
             addQuillTitle();
         },
 
-        methods () {
+        methods: {
         }
     }
 </script>
