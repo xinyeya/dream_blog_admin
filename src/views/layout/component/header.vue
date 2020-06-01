@@ -33,6 +33,9 @@
                 circleUrl: "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
             }
         },
+        created () {
+            this.circleUrl = this.$store.state.avatar
+        },
         methods: {
             errorHandler() {
                 return true

@@ -131,6 +131,7 @@
                     this.ruleForm = data[0]
                     this.imgurl = data[0].avatar
                     console.log(this.ruleForm)
+                    this.$store.commit('getAvatar', this.imgurl)
                 }catch (e) {
                     console.log(e)
                 }
