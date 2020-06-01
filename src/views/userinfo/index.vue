@@ -142,6 +142,14 @@
                 try {
                     let data = await useredit(this.ruleForm)
                     console.log(data)
+                    if (data.code == 200) {
+                        this.$notify({
+                            title: '成功',
+                            message: data.msg,
+                            type: 'success'
+                        });
+                    }
+                    this.resetForm()
                 }catch (e) {
                     console.log(e)
                 }

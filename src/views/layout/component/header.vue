@@ -34,14 +34,25 @@
             }
         },
         created () {
-            this.circleUrl = this.$store.state.avatar
+            this.initAvatar()
         },
+
+        watch: {
+            '$store.state.avatar' () {
+                this.initAvatar()
+            }
+        },
+
         methods: {
             errorHandler() {
                 return true
             },
             userinfo () {
                 this.$router.push({path:'/user_info'})
+            },
+            // 修改头像
+            initAvatar(){
+                this.circleUrl = this.$store.state.avatar
             }
         }
     }
