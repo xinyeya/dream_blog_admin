@@ -2,12 +2,12 @@
     <div>
         <el-card>
             <el-tag
-                    :key="tag"
+                    :key="tag.id"
                     v-for="tag in dynamicTags"
                     closable
                     :disable-transitions="false"
-                    @close="handleClose(tag)">
-                {{tag}}
+                    @close="handleClose(tag.id)">
+                {{tag.title}}
             </el-tag>
             <el-input
                     class="input-new-tag"
@@ -16,7 +16,6 @@
                     ref="saveTagInput"
                     size="small"
                     @keyup.enter.native="handleInputConfirm"
-                    @blur="handleInputConfirm"
             >
             </el-input>
             <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button>
@@ -25,34 +24,102 @@
 </template>
 
 <script>
+    import { labelsList, labelDel, labelsAdd } from '../../api/labels'
     export default {
-        name: "label",
+        name: "Label",
         data() {
             return {
-                dynamicTags: ['标签一', '标签二', '标签三'],
+                dynamicTags: [],
                 inputVisible: false,
                 inputValue: ''
             };
         },
+
+        created () {
+            this.getLabelLsit()
+        },
+
         methods: {
-            handleClose(tag) {
-                this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
+            // 获取所有标签
+            async getLabelLsit () {
+                try {
+                    let data = await labelsList()
+                    this.dynamicTags = data
+                }catch (e) {
+                    console.log(e)
+                }
             },
 
+            // 删除标签
+            async labelDel (id) {
+                try {
+                    let res = await labelDel(id)
+                    if (res.code == 200) {
+                        this.$notify({
+                            title: '成功',
+                            message: res.msg,
+                            type: 'success'
+                        });
+                        this.getLabelLsit()
+                    }
+                }catch (e) {
+                    console.log(e)
+                    this.$notify.error({
+                        title: '失败',
+                        message: '服务器错误'
+                    });
+                }
+            },
+
+            // 添加标签
+            async labelInsert () {
+                try{
+                    console.log(this.inputValue)
+                    let inputValue = this.inputValue.replace(/\s/g,"")
+                    if (inputValue == '') {
+                        this.$notify({
+                            title: '警告',
+                            message: '请输入标签名',
+                            type: 'warning'
+                        });
+                        return
+                    }
+                    console.log(inputValue)
+                    let res = await labelsAdd(inputValue)
+                    if (res.code == 200) {
+                        this.$notify({
+                            title: '成功',
+                            message: res.msg,
+                            type: 'success'
+                        });
+                        this.getLabelLsit()
+                    }
+                    console.log(res)
+                    this.inputVisible = false;
+                    this.inputValue = '';
+                }catch (e) {
+                    console.log(e)
+                }
+            },
+
+            // 关闭删除标签
+            handleClose(tag) {
+                this.labelDel(tag)
+            },
+
+            // 显示输入框
             showInput() {
+                // 添加标签的输入框
+                console.log('输入框')
                 this.inputVisible = true;
                 this.$nextTick(() => {
                     this.$refs.saveTagInput.$refs.input.focus();
                 });
             },
 
+            // 添加内容
             handleInputConfirm() {
-                let inputValue = this.inputValue;
-                if (inputValue) {
-                    this.dynamicTags.push(inputValue);
-                }
-                this.inputVisible = false;
-                this.inputValue = '';
+                this.labelInsert()
             }
         }
     }
