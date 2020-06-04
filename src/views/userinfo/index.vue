@@ -130,7 +130,6 @@
                     let data = await userdetail()
                     this.ruleForm = data[0]
                     this.imgurl = data[0].avatar
-                    console.log(this.ruleForm)
                     this.$store.commit('getAvatar', this.imgurl)
                 }catch (e) {
                     console.log(e)
@@ -141,7 +140,6 @@
             async userEdit () {
                 try {
                     let data = await useredit(this.ruleForm)
-                    console.log(data)
                     if (data.code == 200) {
                         this.$notify({
                             title: '成功',
@@ -173,18 +171,17 @@
                 });
             },
 
-            // 重置
+            // 重置表单
             resetForm() {
                 this.showEdit = false
             },
 
-            // 上传后的预览
+            // 图片上传后的预览
             handleAvatarSuccess(res, file) {
-                console.log(URL.createObjectURL(file.raw))
                 this.imgurl = URL.createObjectURL(file.raw);
             },
 
-            // 上传前的检测
+            // 图片上传前的检测
             beforeAvatarUpload(file) {
                 const isJPG = file.type === 'image/jpeg';
                 const isLt2M = file.size / 1024 / 1024 < 2;

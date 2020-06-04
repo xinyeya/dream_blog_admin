@@ -42,7 +42,7 @@
                             show-overflow-tooltip>
                     </el-table-column>
                     <el-table-column
-                            prop="link"
+                            prop="music"
                             label="直链"
                             show-overflow-tooltip>
                     </el-table-column>
@@ -72,23 +72,47 @@
                     @current-change="handleCurrentChange"
                     :current-page="currentPage"
                     :page-sizes="[10, 20, 30, 40]"
-                    :page-size="10"
+                    :page-size="pageSize"
                     layout="total, sizes, prev, pager, next, jumper"
-                    :total="40">
+                    :total="count">
                 </el-pagination>
             </el-row>
         </el-card>
 <!--        添加||修改表单-->
-        <el-dialog title="收货地址" :visible.sync="dialogFormVisible">
+        <el-dialog title="添加音乐" :visible.sync="dialogFormVisible">
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+                <el-form-item label="封面" prop="imageUrl">
+<!--                    添加上传封面接口-->
+                    <el-upload
+                            v-if="add"
+                            class="avatar-uploader"
+                            action="http://127.0.0.1:3000/admin/musics/insert"
+                            :show-file-list="false"
+                            :on-success="handleAvatarSuccess"
+                            :before-upload="beforeAvatarUpload">
+                        <img v-if="imageUrl" :src="imageUrl" class="avatar">
+                        <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                    </el-upload>
+<!--                    更新上传封面接口-->
+                    <el-upload
+                            v-else
+                            class="avatar-uploader"
+                            action="http://127.0.0.1:3000/admin/musics/update"
+                            :show-file-list="false"
+                            :on-success="handleAvatarSuccess"
+                            :before-upload="beforeAvatarUpload">
+                        <img v-if="imageUrl" :src="imageUrl" class="avatar">
+                        <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                    </el-upload>
+                </el-form-item>
                 <el-form-item label="标题" prop="title">
                     <el-input v-model="ruleForm.title"></el-input>
                 </el-form-item>
                 <el-form-item label="歌手" prop="singer">
                     <el-input v-model="ruleForm.singer"></el-input>
                 </el-form-item>
-                <el-form-item label="直链" prop="link">
-                    <el-input v-model="ruleForm.link"></el-input>
+                <el-form-item label="直链" prop="music">
+                    <el-input v-model="ruleForm.music"></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
@@ -100,26 +124,26 @@
 </template>
 
 <script>
+    import {musicList, musicAdd} from "../../api/music";
+
     export default {
         name: "index",
         data() {
             return {
-                tableData: [
-                    {
-                        id: 1,
-                        title: '反语',
-                        singer: 'majiko',
-                        link: 'http://music.163.com/song/media/outer/url?id=31421442.mp3'
-                    }
-                ],
+                add: true,
+                tableData: [],
+                imageUrl: '',
                 search: '',
                 multipleSelection: [],
                 dialogFormVisible: false,
                 currentPage: 0,
+                pageSize: 10,
+                count: 0,
                 ruleForm: {
                     title: '',
                     singer: '',
-                    link: ''
+                    music: '',
+                    images: ''
                 },
                 formLabelWidth: '120px',
                 rules: {
@@ -129,13 +153,61 @@
                     singer: [
                         { required: true, message: '请输入歌手', trigger: 'blur' }
                     ],
-                    link: [
+                    music: [
                         { required: true, message: '请输入链接', trigger: 'blur' }
+                    ],
+                    images: [
+                        { required: true, message: '请上传封面', trigger: 'blur' }
                     ]
                 }
             }
         },
+        created () {
+            this.getMusicList(1, 5)
+        },
         methods: {
+
+            // 获取所有音乐
+            async getMusicList (pageIndex, pageSize) {
+                try {
+                    let data = await musicList(pageIndex, pageSize)
+                    if (data) {
+                        this.count = data.count[0]['count(id)']
+                        this.tableData = data.res
+                    }else{
+                        this.$notify.error({
+                            title: '失败',
+                            message: data.msg
+                        });
+                    }
+                }catch (e) {
+                    console.log(e)
+                }
+            },
+
+            // 提交表单数据
+            async setMusicAdd () {
+                try {
+                    let data = await musicAdd(this.ruleForm)
+                    if (data.code === 200) {
+                        this.$notify({
+                            title: '成功',
+                            message: data.msg,
+                            type: 'success'
+                        });
+                    }else{
+                        this.$notify.error({
+                            title: '失败',
+                            message: data.msg
+                        });
+                    }
+                    this.dialogFormVisible = false
+                    this.resetForm('ruleForm')
+                }catch (e) {
+                    console.log(e)
+                }
+            },
+
             // 点击修改
             handleEdit(index, row) {
                 console.log(index, row);
@@ -153,12 +225,12 @@
 
             // 每页X条
             handleSizeChange(val) {
-                console.log(`每页 ${val} 条`);
+                this.getMusicList(this.currentPage,val)
             },
 
             // 当前是X页
             handleCurrentChange(val) {
-                console.log(`当前页: ${val}`);
+                this.getMusicList(val,this.pageSize)
             },
 
             // 点击搜索
@@ -170,7 +242,7 @@
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        alert('submit!');
+                        this.setMusicAdd()
                     } else {
                         console.log('error submit!!');
                         return false;
@@ -181,6 +253,26 @@
             //清空表单
             resetForm(formName) {
                 this.$refs[formName].resetFields();
+                this.imageUrl = ''
+            },
+
+            // 预览图片
+            handleAvatarSuccess(res, file) {
+                this.imageUrl = URL.createObjectURL(file.raw)
+            },
+
+            // 上传图片前的检测
+            beforeAvatarUpload(file) {
+                const isJPG = file.type === 'image/jpeg';
+                const isLt2M = file.size / 1024 / 1024 < 2;
+
+                if (!isJPG) {
+                    this.$message.error('上传头像图片只能是 JPG 格式!');
+                }
+                if (!isLt2M) {
+                    this.$message.error('上传头像图片大小不能超过 2MB!');
+                }
+                return isJPG && isLt2M;
             }
         }
     }
@@ -189,5 +281,28 @@
 <style scoped>
 .el-row{
     margin: 10px 0;
+}
+.avatar-uploader .el-upload {
+    border: 1px dashed #000000;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+    border-color: #000000;
+}
+.avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+}
+.avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
 }
 </style>
