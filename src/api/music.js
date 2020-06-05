@@ -26,12 +26,14 @@ export const musicAdd = data => {
     })
 }
 
-// 搜索音乐
-// export const musicSearch = (pageIndex, pageSize, title) => {
-//
-// }
-
 // 删除单个音乐
+export const musicDel = id => {
+    return request({
+        method: 'DELETE',
+        url: 'musics/del',
+        data: {id}
+    })
+}
 
 // 删除多个音乐
 

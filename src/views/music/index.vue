@@ -61,7 +61,7 @@
                                     type="danger"
                                     icon="el-icon-delete"
                                     circle
-                                    @click="handleDelete(scope.$index, scope.row)"></el-button>
+                                    @click="handleDelete(scope.row)"></el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -124,7 +124,7 @@
 </template>
 
 <script>
-    import {musicList, musicAdd} from "../../api/music";
+    import {musicList, musicAdd, musicDel} from "../../api/music";
 
     export default {
         name: "index",
@@ -159,6 +159,7 @@
                 }
             }
         },
+        // 生命周期函数
         created () {
             this.getMusicList(this.currentPage, this.pageSize)
         },
@@ -242,8 +243,32 @@
             },
 
             // 点击删除
-            handleDelete(index, row) {
-                console.log(index, row);
+            handleDelete(row) {
+                try{
+                    this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(async () => {
+                        let data = await musicDel(row.id)
+                        if (data.code === 200) {
+                            this.$message({
+                                type: 'success',
+                                message: data.msg
+                            });
+                        }else{
+                            this.$message.error(data.msg);
+                        }
+                        this.getMusicList(this.currentPage, this.pageSize)
+                    }).catch(() => {
+                        this.$message({
+                            type: 'info',
+                            message: '已取消删除'
+                        });
+                    });
+                }catch (e) {
+                    console.log(e)
+                }
             },
 
             // 多选
