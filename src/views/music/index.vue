@@ -8,8 +8,8 @@
                     <el-button type="primary" @click="dialogFormVisible = true">添加</el-button>
                 </el-col>
                 <el-col :span="5">
-                    <el-input placeholder="请输入内容" v-model="search" class="input-with-select">
-                        <el-button slot="append" icon="el-icon-search" @click="handleSearch"></el-button>
+                    <el-input placeholder="请输入内容" v-model="search" @keyup.enter.native="handleSearch(search)" class="input-with-select">
+                        <el-button slot="append" icon="el-icon-search" @click="handleSearch(search)"></el-button>
                     </el-input>
                 </el-col>
             </el-row>
@@ -163,11 +163,6 @@
             this.getMusicList(this.currentPage, this.pageSize)
         },
         methods: {
-
-            test(){
-                alert(1)
-            },
-
             // 获取所有音乐
             async getMusicList (pageIndex, pageSize) {
                 try {
@@ -210,6 +205,37 @@
                 }
             },
 
+            // 点击搜索
+            async handleSearch (search, pageIndex, pageSize) {
+                try{
+                    if (!pageIndex) {
+                        pageIndex = 1
+                    }
+
+                    if (!pageSize) {
+                        pageSize = 10
+                    }
+                    let data = await musicList(pageIndex, pageSize, search)
+                    if (data) {
+                        this.$notify({
+                            title: '成功',
+                            message: '搜索成功',
+                            type: 'success'
+                        });
+                        console.log(data)
+                        this.count = data.count[0]['count(id)']
+                        this.tableData = data.res
+                    }else{
+                        this.$notify.error({
+                            title: '失败',
+                            message: '搜索失败'
+                        })
+                    }
+                }catch (e) {
+                    console.log(e)
+                }
+            },
+
             // 点击修改
             handleEdit(index, row) {
                 console.log(index, row);
@@ -227,17 +253,20 @@
 
             // 每页X条
             handleSizeChange(val) {
-                this.getMusicList(this.currentPage,val)
+                if (!this.search) {
+                    this.getMusicList(this.currentPage, val)
+                }else{
+                    this.handleSearch(this.search, this.currentPage, val)
+                }
             },
 
             // 当前是X页
             handleCurrentChange(val) {
-                this.getMusicList(val,this.pageSize)
-            },
-
-            // 点击搜索
-            handleSearch () {
-                console.log('搜索')
+                if (!this.search) {
+                    this.getMusicList(val, this.pageSize)
+                }else{
+                    this.handleSearch(this.search, val, this.pageSize)
+                }
             },
 
             // 添加音乐
