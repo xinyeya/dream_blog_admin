@@ -106,16 +106,16 @@
                     </el-upload>
                 </el-form-item>
                 <el-form-item label="标题" prop="title">
-                    <el-input v-model="ruleForm.title"></el-input>
+                    <el-input v-model="ruleForm.title" @keyup.enter.native="submitForm('ruleForm')"></el-input>
                 </el-form-item>
                 <el-form-item label="歌手" prop="singer">
-                    <el-input v-model="ruleForm.singer"></el-input>
+                    <el-input v-model="ruleForm.singer" @keyup.enter.native="submitForm('ruleForm')"></el-input>
                 </el-form-item>
                 <el-form-item label="直链" prop="music">
-                    <el-input v-model="ruleForm.music"></el-input>
+                    <el-input v-model="ruleForm.music" @keyup.enter.native="submitForm('ruleForm')"></el-input>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
+                    <el-button type="primary" @keyup.enter.native="submitForm('ruleForm')" @click="submitForm('ruleForm')">立即创建</el-button>
                     <el-button @click="resetForm('ruleForm')">重置</el-button>
                 </el-form-item>
             </el-form>
@@ -136,7 +136,7 @@
                 search: '',
                 multipleSelection: [],
                 dialogFormVisible: false,
-                currentPage: 0,
+                currentPage: 1,
                 pageSize: 10,
                 count: 0,
                 ruleForm: {
@@ -155,17 +155,18 @@
                     ],
                     music: [
                         { required: true, message: '请输入链接', trigger: 'blur' }
-                    ],
-                    images: [
-                        { required: true, message: '请上传封面', trigger: 'blur' }
                     ]
                 }
             }
         },
         created () {
-            this.getMusicList(1, 5)
+            this.getMusicList(this.currentPage, this.pageSize)
         },
         methods: {
+
+            test(){
+                alert(1)
+            },
 
             // 获取所有音乐
             async getMusicList (pageIndex, pageSize) {
@@ -195,6 +196,7 @@
                             message: data.msg,
                             type: 'success'
                         });
+                        this.getMusicList(this.currentPage, this.pageSize)
                     }else{
                         this.$notify.error({
                             title: '失败',
@@ -242,8 +244,13 @@
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        this.setMusicAdd()
+                        if (this.imageUrl == '') {
+                            alert('请上传封面')
+                        }else{
+                            this.setMusicAdd()
+                        }
                     } else {
+                        console.log(this.imageUrl)
                         console.log('error submit!!');
                         return false;
                     }
