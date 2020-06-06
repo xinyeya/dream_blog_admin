@@ -346,6 +346,11 @@
             //清空表单
             resetForm(formName) {
                 this.$refs[formName].resetFields();
+                this.ruleForm.id = ''
+                this.ruleForm.title = ''
+                this.ruleForm.images = ''
+                this.ruleForm.singer = ''
+                this.ruleForm.music = ''
                 this.imageUrl = ''
             },
 
