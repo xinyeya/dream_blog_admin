@@ -26,7 +26,7 @@ export const musicAdd = data => {
     })
 }
 
-// 删除单个音乐
+// 删除音乐
 export const musicDel = id => {
     return request({
         method: 'DELETE',

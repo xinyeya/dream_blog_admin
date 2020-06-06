@@ -4,8 +4,10 @@
         <el-card>
 <!--            添加&&搜索-->
             <el-row type="flex" justify="space-between" align="center">
-                <el-col :span="3">
+                <el-col :span="5">
                     <el-button type="primary" @click="handleAddShow">添加</el-button>
+                    <el-button v-if="multipleSelection.length > 0" type="danger" @click="handleDelete">全部删除</el-button>
+                    <el-button v-else type="danger" disabled @click="handleDelete">全部删除</el-button>
                 </el-col>
                 <el-col :span="5">
                     <el-input placeholder="请输入内容" v-model="search" @keyup.enter.native="handleSearch(search)" class="input-with-select">
@@ -112,7 +114,7 @@
 </template>
 
 <script>
-    import {musicList, musicAdd, musicDel, musicEditShow, musicEdit} from "../../api/music";
+    import {musicList, musicAdd, musicDel,musicEditShow, musicEdit} from "../../api/music";
 
     export default {
         name: "index",
@@ -254,7 +256,19 @@
                         cancelButtonText: '取消',
                         type: 'warning'
                     }).then(async () => {
-                        let data = await musicDel(row.id)
+                        let delArr = []
+
+                        // 存储单选的id
+                        if (row.id) {
+                            delArr.push(row.id)
+                        }
+
+                        // 存储多选的id
+                        this.multipleSelection.forEach((item) => {
+                            delArr.push(item.id)
+                        })
+                        let data = await musicDel(delArr)
+
                         if (data.code === 200) {
                             this.$message({
                                 type: 'success',
@@ -279,7 +293,6 @@
             async setMusicEdit (id) {
                 try {
                     let data = await musicEdit(id, this.ruleForm)
-                    console.log(data)
                     if (data.code === 200) {
                         this.$notify({
                             title: '成功',
