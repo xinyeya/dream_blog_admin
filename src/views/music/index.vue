@@ -5,7 +5,7 @@
 <!--            添加&&搜索-->
             <el-row type="flex" justify="space-between" align="center">
                 <el-col :span="3">
-                    <el-button type="primary" @click="dialogFormVisible = true">添加</el-button>
+                    <el-button type="primary" @click="handleAddShow">添加</el-button>
                 </el-col>
                 <el-col :span="5">
                     <el-input placeholder="请输入内容" v-model="search" @keyup.enter.native="handleSearch(search)" class="input-with-select">
@@ -55,7 +55,7 @@
                                     size="mini"
                                     icon="el-icon-edit"
                                     circle
-                                    @click="handleEdit(scope.$index, scope.row)"></el-button>
+                                    @click="handleEdit(scope.row)"></el-button>
                             <el-button
                                     size="mini"
                                     type="danger"
@@ -84,20 +84,8 @@
                 <el-form-item label="封面" prop="imageUrl">
 <!--                    添加上传封面接口-->
                     <el-upload
-                            v-if="add"
                             class="avatar-uploader"
                             action="http://127.0.0.1:3000/admin/musics/insert"
-                            :show-file-list="false"
-                            :on-success="handleAvatarSuccess"
-                            :before-upload="beforeAvatarUpload">
-                        <img v-if="imageUrl" :src="imageUrl" class="avatar">
-                        <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-                    </el-upload>
-<!--                    更新上传封面接口-->
-                    <el-upload
-                            v-else
-                            class="avatar-uploader"
-                            action="http://127.0.0.1:3000/admin/musics/update"
                             :show-file-list="false"
                             :on-success="handleAvatarSuccess"
                             :before-upload="beforeAvatarUpload">
@@ -124,12 +112,13 @@
 </template>
 
 <script>
-    import {musicList, musicAdd, musicDel} from "../../api/music";
+    import {musicList, musicAdd, musicDel, musicEditShow, musicEdit} from "../../api/music";
 
     export default {
         name: "index",
         data() {
             return {
+                editId: '',
                 add: true,
                 tableData: [],
                 imageUrl: '',
@@ -206,7 +195,7 @@
                 }
             },
 
-            // 点击搜索
+            // 开始搜索
             async handleSearch (search, pageIndex, pageSize) {
                 try{
                     if (!pageIndex) {
@@ -237,9 +226,24 @@
                 }
             },
 
-            // 点击修改
-            handleEdit(index, row) {
-                console.log(index, row);
+            // 点击修改按钮
+            async handleEdit (row) {
+                try {
+                    this.editId = row.id
+                    let data = await musicEditShow(this.editId)
+                    this.ruleForm = data[0]
+                    this.imageUrl = this.ruleForm.images
+                    this.add = false
+                    this.dialogFormVisible = true
+                }catch (e) {
+                    console.log(e)
+                }
+            },
+
+            // 显示添加弹框
+            handleAddShow () {
+                this.dialogFormVisible = true
+                this.add = true
             },
 
             // 点击删除
@@ -271,6 +275,31 @@
                 }
             },
 
+            // 提交修改后的数据
+            async setMusicEdit (id) {
+                try {
+                    let data = await musicEdit(id, this.ruleForm)
+                    console.log(data)
+                    if (data.code === 200) {
+                        this.$notify({
+                            title: '成功',
+                            message: data.msg,
+                            type: 'success'
+                        });
+                        this.getMusicList(this.currentPage, this.pageSize)
+                    }else{
+                        this.$notify.error({
+                            title: '失败',
+                            message: data.msg
+                        });
+                    }
+                    this.dialogFormVisible = false
+                    this.resetForm('ruleForm')
+                }catch (e) {
+                    console.log(e)
+                }
+            },
+
             // 多选
             handleSelectionChange(val) {
                 this.multipleSelection = val;
@@ -294,17 +323,20 @@
                 }
             },
 
-            // 添加音乐
+            // 表单验证
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         if (this.imageUrl == '') {
                             alert('请上传封面')
                         }else{
-                            this.setMusicAdd()
+                            if (this.add) {
+                                this.setMusicAdd()
+                            }else{
+                                this.setMusicEdit(this.editId)
+                            }
                         }
                     } else {
-                        console.log(this.imageUrl)
                         console.log('error submit!!');
                         return false;
                     }

@@ -37,4 +37,19 @@ export const musicDel = id => {
 
 // 删除多个音乐
 
-// 修改音乐
+// 显示要修改的音乐数据
+export const musicEditShow = id => {
+    return request({
+        method: 'GET',
+        url: `musics/editshow?id=${id}`
+    })
+}
+
+export const musicEdit = (id, data) => {
+    return request({
+        method: 'POST',
+        url: `musics/insert?id=${id}`,
+        data: data
+    })
+}
+
