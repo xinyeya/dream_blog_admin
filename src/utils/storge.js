@@ -1,16 +1,16 @@
 const localStorage = window.localStorage
 
 // 获取缓存
-export function getStorage () {
-    return JSON.parse(localStorage.getItem(USER_KEY))
+export function getStorage (key) {
+    return JSON.parse(localStorage.getItem(key))
 }
 
 // 保存缓存
-export function saveStorage (val) {
-    localStorage.setItem(USER_KEY, val)
+export function saveStorage (key, val) {
+    localStorage.setItem(key, val)
 }
 
 // 删除缓存
-export function removeStorage() {
-    localStorage.removeItem(USER_KEY)
+export function removeStorage(key) {
+    localStorage.removeItem(key)
 }
