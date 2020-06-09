@@ -8,7 +8,7 @@
                     <el-button type="danger" v-else @click="handleSearch">全部删除</el-button>
                 </el-col>
                 <el-col :span="6">
-                    <el-input placeholder="请输入内容" v-model="search" class="input-with-select">
+                    <el-input placeholder="请输入内容" v-model="search" @keyup.enter.native="handleSearch" class="input-with-select">
                         <el-button slot="append" icon="el-icon-search" @click="handleSearch"></el-button>
                     </el-input>
                 </el-col>
@@ -171,7 +171,7 @@
 
             // 搜索文章
             handleSearch () {
-                console.log(this.search)
+                this.getArticleList(1, 5, this.search)
             },
 
             // 选中的数据
