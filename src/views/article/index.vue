@@ -34,39 +34,29 @@
                 <el-table-column
                         prop="title"
                         label="标题"
-                        width="180">
+                        width="260">
                 </el-table-column>
                 <el-table-column
                         prop="desc"
                         label="简介"
-                        width="261"
+                        width="400"
                         show-overflow-tooltip>
                 </el-table-column>
                 <el-table-column
-                        prop="com_num"
-                        label="评论数量"
-                        sortable
-                        width="120"
-                        show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column
-                        prop="praise_num"
-                        label="赞数量"
-                        sortable
-                        width="120"
-                        show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column
-                        prop="common_status"
-                        label="评论权限"
-                        width="100"
+                        prop="status"
+                        label="状态"
                         show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <el-switch
-                            v-model="scope.row.common_status"
-                            active-color="#13ce66"
-                            inactive-color="#ff4949">
-                        </el-switch>
+                        <el-tooltip :content="'Switch value: ' + scope.row.status" placement="top">
+                            <el-switch
+                                v-model="scope.row.status"
+                                :active-value="1"
+                                :inactive-value="0"
+                                active-color="#13ce66"
+                                inactive-color="#ff4949"
+                                @change="changeSwitch($event, scope.row)">
+                            </el-switch>
+                        </el-tooltip>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -84,11 +74,11 @@
                 <el-pagination
                         @size-change="handleSizeChange"
                         @current-change="handleCurrentChange"
-                        :current-page="currentPage"
+                        :current-page="pageIndex"
                         :page-sizes="[5, 10, 15, 20]"
-                        :page-size="5"
+                        :page-size="pageSize"
                         layout="total, sizes, prev, pager, next, jumper"
-                        :total="40">
+                        :total="total">
                 </el-pagination>
             </el-row>
         </el-card>
@@ -96,34 +86,43 @@
 </template>
 
 <script>
+    import {articleInfo, articleState} from "../../api/articles";
+
     export default {
         name: "index",
         data () {
             return {
                 search: '',
-                tableData: [
-                    {
-                        id: 1,
-                        title: '测试标题1',
-                        desc: '测试简介1',
-                        com_num: 1,
-                        praise_num: 1,
-                        common_status: true
-                    },
-                    {
-                        id: 2,
-                        title: '测试标题2',
-                        desc: '测试简介2',
-                        com_num: 2,
-                        praise_num: 2,
-                        common_status: false
-                    }
-                ],
-                currentPage: 0,
+                total: 0,
+                tableData: [],
+                pageIndex: 1,
+                pageSize: 5,
                 multipleSelection: []
             }
         },
+
+        created () {
+            this.getArticleList(1, 5)
+        },
+
         methods: {
+            // 获取所有文章信息
+            async getArticleList (pageIndex, pageSize, search) {
+                try {
+                    let data = []
+                    if (search) {
+                        data = await articleInfo({pageIndex, pageSize, search})
+                    }else{
+                        data = await articleInfo({pageIndex, pageSize})
+                    }
+                    let {count, res} = data
+                    this.total = count[0]['count(id)']
+                    this.tableData = res
+                } catch (e) {
+                    console.log(e)
+                }
+            },
+
             // 跳转修改页面
             handleEditArticle (id) {
                 console.log('跳转修改页面'+id)
@@ -149,6 +148,27 @@
                 })
             },
 
+            // 修改状态
+            async changeSwitch (state, data) {
+                // data 开关当前值
+                // b 获取的表格列数据
+                let id = data.id
+                let status = state
+                let res = await articleState({id, status})
+                if (res.code === 200) {
+                    this.$notify({
+                        title: '成功',
+                        message: res.msg,
+                        type: 'success'
+                    })
+                }else{
+                    this.$notify.error({
+                        title: '失败',
+                        message: res.msg
+                    })
+                }
+            },
+
             // 搜索文章
             handleSearch () {
                 console.log(this.search)
@@ -161,12 +181,12 @@
 
             // 每页多少条数据
             handleSizeChange(val) {
-                console.log(`每页 ${val} 条`);
+                this.getArticleList(this.pageIndex, val)
             },
 
             // 当前页码
             handleCurrentChange(val) {
-                console.log(`当前页: ${val}`);
+                this.getArticleList(val, this.pageSize)
             }
         }
     }
