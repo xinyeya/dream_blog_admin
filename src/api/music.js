@@ -35,8 +35,6 @@ export const musicDel = id => {
     })
 }
 
-// 删除多个音乐
-
 // 显示要修改的音乐数据
 export const musicEditShow = id => {
     return request({

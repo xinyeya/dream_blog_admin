@@ -5,7 +5,7 @@
             <el-row style="margin-bottom: 10px" type="flex" justify="space-between" align="center">
                 <el-col :span="6">
                     <el-button type="danger" v-if="multipleSelection.length == 0" disabled>全部删除</el-button>
-                    <el-button type="danger" v-else @click="handleSearch">全部删除</el-button>
+                    <el-button type="danger" v-else @click="handleDelArticle">全部删除</el-button>
                 </el-col>
                 <el-col :span="6">
                     <el-input placeholder="请输入内容" v-model="search" @keyup.enter.native="handleSearch" class="input-with-select">
@@ -64,8 +64,8 @@
                         width="130"
                         show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <el-button type="primary" icon="el-icon-edit" size="mini" @click="handleEditArticle(scope.row.id)" circle></el-button>
-                        <el-button type="danger" icon="el-icon-delete" size="mini" @click="handleDelArticle(scope.row.id)" circle></el-button>
+                        <el-button type="primary" icon="el-icon-edit" size="mini" @click="handleEditArticle(scope.row)" circle></el-button>
+                        <el-button type="danger" icon="el-icon-delete" size="mini" @click="handleDelArticle(scope.row)" circle></el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -86,7 +86,7 @@
 </template>
 
 <script>
-    import {articleInfo, articleState} from "../../api/articles";
+    import {articleDel, articleInfo, articleState} from "../../api/articles";
 
     export default {
         name: "index",
@@ -118,6 +118,7 @@
                     let {count, res} = data
                     this.total = count[0]['count(id)']
                     this.tableData = res
+                    console.log(this.tableData)
                 } catch (e) {
                     console.log(e)
                 }
@@ -129,23 +130,46 @@
             },
 
             // 删除文章
-            handleDelArticle (id) {
-                console.log(id)
-                this.$confirm('此操作将永久删除该文章, 是否继续?', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(() => {
-                    this.$message({
-                        type: 'success',
-                        message: '删除成功!'
-                    })
-                }).catch(() => {
-                    this.$message({
-                        type: 'info',
-                        message: '已取消删除'
-                    })
-                })
+            handleDelArticle (row) {
+                try{
+                    this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(async () => {
+                        let delArr = []
+
+                        // 存储单选的id
+                        if (row.id) {
+                            delArr.push(row.id)
+                        }
+
+                        // 存储多选的id
+                        this.multipleSelection.forEach((item) => {
+                            delArr.push(item.id)
+                        })
+
+                        let data = await articleDel(delArr)
+
+                        if (data.code === 200) {
+                            this.$message({
+                                type: 'success',
+                                message: data.msg
+                            });
+                        }else{
+                            this.$message.error(data.msg);
+                        }
+                        console.log(this.pageIndex, this.pageSize)
+                        this.getArticleList(this.pageIndex, this.pageSize)
+                    }).catch(() => {
+                        this.$message({
+                            type: 'info',
+                            message: '已取消删除'
+                        });
+                    });
+                }catch (e) {
+                    console.log(e)
+                }
             },
 
             // 修改状态

@@ -40,3 +40,12 @@ export const articleState = data => {
         data:data
     })
 }
+
+// 删除文章
+export const articleDel = id => {
+    return request({
+        method: 'DELETE',
+        url: 'articles/del',
+        data: {id}
+    })
+}
