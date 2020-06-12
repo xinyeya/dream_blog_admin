@@ -125,8 +125,10 @@
             },
 
             // 跳转修改页面
-            handleEditArticle (id) {
-                console.log('跳转修改页面'+id)
+            handleEditArticle (row) {
+                let id = row.id
+                console.log(id)
+                this.$router.push({path: '/', query: {article_id: id}});
             },
 
             // 删除文章

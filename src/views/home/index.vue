@@ -45,7 +45,7 @@
             <el-row type="flex">
                 <el-col>
                     <el-button style="background-color: #F5F7FA;border-right: none;color: #909399;cursor: text;">标签</el-button>
-                    <el-select style="width: 93.4%;border-left: none;" v-model="form.label" multiple placeholder="请选择">
+                    <el-select style="width: 93.4%;border-left: none;" v-model="form.label_id" multiple placeholder="请选择">
                         <el-option
                                 v-for="item in options"
                                 :key="item.value"
@@ -81,7 +81,7 @@
     import { quillEditor } from 'vue-quill-editor'
     import { addQuillTitle } from '@/utils/quill-title.js'
 
-    import {articleText, labelsList} from "../../api/articles";
+    import {articleEditShow, aricleEdit, articleText, labelsList} from "../../api/articles";
 
     export default {
         name: "Home",
@@ -93,12 +93,14 @@
             return {
                 href: '',
                 imageUrl: '',
+                editState: false,
                 form: {
+                    id: '',
                     title: '',
                     desc: '',
                     images: '',
                     content: '',
-                    label: [],
+                    label_id: [],
                 },
                 editorOption: {
                     placeholder: "请输入文章内容..."
@@ -110,9 +112,7 @@
         // 获取标签内容
         created () {
             this.getLabel()
-        },
-
-        watch: {
+            this.editShow()
         },
 
         // 渲染富文本
@@ -185,7 +185,7 @@
                         return
                     }
 
-                    if (!this.form.label || this.form.label == []) {
+                    if (!this.form.label_id || this.form.label_id == []) {
                         this.$message({
                             showClose: true,
                             message: '请选择分类标签',
@@ -204,19 +204,41 @@
                     }
 
                     this.form.status = status
-                    let data = await articleText(this.form)
-                    if (data.code === 200) {
-                        this.$notify({
-                            title: '成功',
-                            message: data.msg,
-                            type: 'success'
-                        })
-                        this.reset()
+
+                    if (this.editState) {
+                        // 修改文章内容
+                        let data = await aricleEdit(this.form)
+                        if (data.code === 200) {
+                            this.$notify({
+                                title: '成功',
+                                message: data.msg,
+                                type: 'success'
+                            })
+                            this.reset()
+                        }else{
+                            this.$notify.error({
+                                title: '失败',
+                                message: data.msg
+                            })
+                        }
+                        this.$router.push({path: '/'});
+                        this.editState = false
                     }else{
-                        this.$notify.error({
-                            title: '失败',
-                            message: data.msg
-                        })
+                        // 保存文章内容
+                        let data = await articleText(this.form)
+                        if (data.code === 200) {
+                            this.$notify({
+                                title: '成功',
+                                message: data.msg,
+                                type: 'success'
+                            })
+                            this.reset()
+                        }else{
+                            this.$notify.error({
+                                title: '失败',
+                                message: data.msg
+                            })
+                        }
                     }
                 }catch(e) {
                     console.log(e)
@@ -233,12 +255,40 @@
                 this.setArticleText(1)
             },
 
+            // 获取修改的文章的id
+            async editShow () {
+                if (this.$route.query === {}) {
+                    return
+                }
+
+                this.editState = true
+
+                let {article_id} = this.$route.query
+
+                let res = await articleEditShow(article_id)
+
+                let data = res[0]
+
+                // 处理labels
+                data.label_id = data.label_id.split(',')
+                let labelArr = []
+                data.label_id.forEach(item=>{
+                    labelArr.push(parseInt(item))
+                })
+
+                data.label_id = labelArr
+                this.imageUrl = data.images
+
+                // 修改数据
+                this.form = data
+            },
+
             // 清空文章内容
             reset () {
                 this.form.title = ''
                 this.form.desc = ''
                 this.form.content = ''
-                this.form.label = []
+                this.form.label_id = []
                 this.imageUrl = ''
             },
 

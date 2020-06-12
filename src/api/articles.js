@@ -49,3 +49,19 @@ export const articleDel = id => {
         data: {id}
     })
 }
+
+// 获取单个文章信息
+export const articleEditShow = id => {
+    return request({
+        method: 'GET',
+        url: 'articles/editshow?id='+id,
+    })
+}
+
+export const aricleEdit = data => {
+    return request({
+        method: 'PUT',
+        url: 'articles/update',
+        data: data
+    })
+}
