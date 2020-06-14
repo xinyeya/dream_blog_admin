@@ -57,6 +57,7 @@
                 if (data) {
                     let token = data.token
                     saveStorage('token', token)
+                    saveStorage('avatar', data.avatar)
                     this.$store.commit('setAvatar', data.avatar)
                 }
                 this.$router.push({path: '/'});

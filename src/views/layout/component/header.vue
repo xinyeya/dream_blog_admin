@@ -17,7 +17,7 @@
                         <el-dropdown-item>
                             <span @click="userinfo">个人信息</span>
                         </el-dropdown-item>
-                        <el-dropdown-item>退出登录</el-dropdown-item>
+                        <el-dropdown-item @click="userOut">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
             </el-col>
@@ -26,6 +26,8 @@
 </template>
 
 <script>
+    import {removeStorage} from "../../../utils/storge";
+
     export default {
         name: "Header",
         data () {
@@ -45,6 +47,10 @@
             userinfo () {
                 this.$router.push({path:'/user_info'})
             },
+            userOut () {
+                removeStorage('token')
+                this.$router.push({path:'/login'})
+            }
         }
     }
 </script>

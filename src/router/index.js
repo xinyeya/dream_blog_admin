@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import {getStorage} from "../utils/storge";
+// import {getStorage} from "../utils/storge";
 
 Vue.use(VueRouter)
 
@@ -7,7 +9,7 @@ Vue.use(VueRouter)
   {
     path: '/login',
     name: 'login',
-    component: () => import('@/views/login')
+    component: () => import('@/views/login'),
   },
   {
     path: '',
@@ -45,6 +47,18 @@ Vue.use(VueRouter)
 
 const router = new VueRouter({
   routes
+})
+
+router.beforeEach((to, form, next) => {
+  if (to.path === '/login') {
+    if (getStorage('token')) {
+      next('/')
+    }else{
+      next()
+    }
+  }else{
+    next()
+  }
 })
 
 export default router
