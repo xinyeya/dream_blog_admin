@@ -10,6 +10,7 @@
                     <el-upload
                             class="avatar-uploader"
                             action="http://127.0.0.1:3000/admin/articles/insert"
+                            :headers="headers"
                             :show-file-list="false"
                             list-type="picture"
                             :on-success="handleAvatarSuccess">
@@ -82,6 +83,7 @@
     import { addQuillTitle } from '@/utils/quill-title.js'
 
     import {articleEditShow, aricleEdit, articleText, labelsList} from "../../api/articles";
+    import {getStorage} from "../../utils/storge";
 
     export default {
         name: "Home",
@@ -118,17 +120,14 @@
         // 渲染富文本
         mounted() {
             addQuillTitle();
-            window.onbeforeunload = function (e) {
-                e = e || window.event;
+        },
 
-                // 兼容IE8和Firefox 4之前的版本
-                if (e) {
-                    e.returnValue = '关闭提示';
+        computed: {
+            headers() {
+                return{
+                    "authorization": "Bearer " + getStorage('token') // 直接从本地获取token就行
                 }
-
-                // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
-                return '关闭提示';
-            };
+            }
         },
 
         methods: {
@@ -257,30 +256,29 @@
 
             // 获取修改的文章的id
             async editShow () {
-                if (this.$route.query === {}) {
-                    return
+                if (typeof(this.$route.query.article_id) == 'number'){
+                    console.log(2222)
+                    this.editState = true
+
+                    let {article_id} = this.$route.query
+
+                    let res = await articleEditShow(article_id)
+
+                    let data = res[0]
+
+                    // 处理labels
+                    data.label_id = data.label_id.split(',')
+                    let labelArr = []
+                    data.label_id.forEach(item=>{
+                        labelArr.push(parseInt(item))
+                    })
+
+                    data.label_id = labelArr
+                    this.imageUrl = data.images
+
+                    // 修改数据
+                    this.form = data
                 }
-
-                this.editState = true
-
-                let {article_id} = this.$route.query
-
-                let res = await articleEditShow(article_id)
-
-                let data = res[0]
-
-                // 处理labels
-                data.label_id = data.label_id.split(',')
-                let labelArr = []
-                data.label_id.forEach(item=>{
-                    labelArr.push(parseInt(item))
-                })
-
-                data.label_id = labelArr
-                this.imageUrl = data.images
-
-                // 修改数据
-                this.form = data
             },
 
             // 清空文章内容

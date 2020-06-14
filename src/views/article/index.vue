@@ -118,7 +118,6 @@
                     let {count, res} = data
                     this.total = count[0]['count(id)']
                     this.tableData = res
-                    console.log(this.tableData)
                 } catch (e) {
                     console.log(e)
                 }
@@ -127,7 +126,6 @@
             // 跳转修改页面
             handleEditArticle (row) {
                 let id = row.id
-                console.log(id)
                 this.$router.push({path: '/', query: {article_id: id}});
             },
 
@@ -161,7 +159,6 @@
                         }else{
                             this.$message.error(data.msg);
                         }
-                        console.log(this.pageIndex, this.pageSize)
                         this.getArticleList(this.pageIndex, this.pageSize)
                     }).catch(() => {
                         this.$message({

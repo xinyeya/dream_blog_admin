@@ -88,6 +88,7 @@
                     <el-upload
                             class="avatar-uploader"
                             action="http://127.0.0.1:3000/admin/musics/insert"
+                            :headers="headers"
                             :show-file-list="false"
                             :on-success="handleAvatarSuccess"
                             :before-upload="beforeAvatarUpload">
@@ -115,6 +116,7 @@
 
 <script>
     import {musicList, musicAdd, musicDel,musicEditShow, musicEdit} from "../../api/music";
+    import {getStorage} from "../../utils/storge";
 
     export default {
         name: "index",
@@ -154,6 +156,15 @@
         created () {
             this.getMusicList(this.currentPage, this.pageSize)
         },
+
+        computed: {
+            headers() {
+                return{
+                    "authorization": "Bearer " + getStorage('token') // 直接从本地获取token就行
+                }
+            }
+        },
+
         methods: {
             // 获取所有音乐
             async getMusicList (pageIndex, pageSize) {

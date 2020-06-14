@@ -30,17 +30,12 @@
         name: "Header",
         data () {
             return {
-                circleUrl: "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+                circleUrl: ""
             }
-        },
-        created () {
-            this.initAvatar()
         },
 
-        watch: {
-            '$store.state.avatar' () {
-                this.initAvatar()
-            }
+        created () {
+            this.circleUrl = this.$store.state.avatar
         },
 
         methods: {
@@ -50,14 +45,9 @@
             userinfo () {
                 this.$router.push({path:'/user_info'})
             },
-            // 修改头像
-            initAvatar(){
-                this.circleUrl = this.$store.state.avatar
-            }
         }
     }
 </script>
 
 <style scoped>
-
 </style>

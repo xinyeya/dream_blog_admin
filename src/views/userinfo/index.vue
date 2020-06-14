@@ -7,6 +7,7 @@
                     <el-upload
                             class="avatar-uploader"
                             action="http://127.0.0.1:3000/admin/users/update"
+                            :headers="headers"
                             :show-file-list="false"
                             :on-success="handleAvatarSuccess"
                             :before-upload="beforeAvatarUpload">
@@ -65,6 +66,7 @@
 
 <script>
     import {userdetail, useredit} from "../../api/users";
+    import {getStorage, saveStorage} from "../../utils/storge";
 
     export default {
         name: "userInfo",
@@ -114,7 +116,8 @@
                     sex: [
                         { required: true, message: '请选择性别', trigger: 'change' }
                     ]
-                }
+                },
+                href: ''
             }
         },
 
@@ -122,15 +125,23 @@
             this.getUserInfo()
         },
 
-        methods: {
+        computed: {
+            headers() {
+                return{
+                    "authorization": "Bearer " + getStorage('token') // 直接从本地获取token就行
+                }
+            }
+        },
 
+        methods: {
             // 获取用户信息
             async getUserInfo () {
                 try{
                     let data = await userdetail()
                     this.ruleForm = data[0]
                     this.imgurl = data[0].avatar
-                    this.$store.commit('getAvatar', this.imgurl)
+                    this.$store.commit('setAvatar', data[0].avatar)
+                    saveStorage('avatar', data[0].avatar)
                 }catch (e) {
                     console.log(e)
                 }
@@ -147,6 +158,7 @@
                             type: 'success'
                         });
                     }
+                    this.$router.go(0)
                     this.resetForm()
                 }catch (e) {
                     console.log(e)

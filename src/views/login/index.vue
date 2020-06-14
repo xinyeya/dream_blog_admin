@@ -26,6 +26,10 @@
 </template>
 
 <script>
+    import {loginCheck} from "../../api/login";
+    import {saveStorage} from "../../utils/storge";
+    import md5 from 'js-md5';
+
     export default {
         name: "login",
         data() {
@@ -46,11 +50,23 @@
             };
         },
         methods: {
+            async handlelogin () {
+                let password = this.ruleForm.password
+                this.ruleForm.password = md5(password)
+                let data = await loginCheck(this.ruleForm)
+                if (data) {
+                    let token = data.token
+                    saveStorage('token', token)
+                    this.$store.commit('setAvatar', data.avatar)
+                }
+                this.$router.push({path: '/'});
+            },
+
             // 登录前的验证
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        alert('submit!');
+                        this.handlelogin()
                     } else {
                         console.log('error submit!!');
                         return false;
